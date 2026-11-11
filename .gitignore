@@ -1,0 +1,68 @@
+# SOC Lab Portfolio - Git Ignore
+
+# Evidence files (large, contain sensitive data hashes)
+investigations/*/evidence/*.raw
+investigations/*/evidence/*.E01
+investigations/*/evidence/*.pcapng
+investigations/*/evidence/*.001
+investigations/*/evidence/*.dmp
+
+# Memory dumps
+*.dmp
+*.raw
+*.mem
+
+# Disk images
+*.E01
+*.ex01
+*.vmdk
+*.vhd
+*.vhdx
+
+# PCAP files
+*.pcap
+*.pcapng
+*.cap
+
+# Archives
+*.tar.gz
+*.zip
+*.7z
+
+# Sensitive data
+*.key
+*.pem
+*.pfx
+*.p12
+*.crt
+*.cer
+
+# Environment / Config
+.env
+.env.local
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Credentials (never commit!)
+*password*
+*secret*
+*token*
+*credential*
