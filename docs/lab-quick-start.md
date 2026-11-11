@@ -1,4 +1,4 @@
-# Lab Quick-Start Guide: Wazuh + Windows + Kali
+# Lab Quick-Start Guide: Wazuh + Windows + Kali (VMware)
 **One-time setup — follow once, then reference for rebuilds**
 
 ---
@@ -7,27 +7,30 @@
 
 | Software | Download Link |
 |----------|---------------|
-| VirtualBox 7.0+ | https://www.virtualbox.org/wiki/Downloads |
-| VirtualBox Extension Pack | Same page (for USB 3.0, PXE boot) |
+| VMware Workstation 17.x (or VMware Player 17.x) | https://www.vmware.com/products/workstation-player.html |
 | Ubuntu 22.04 Server ISO | https://ubuntu.com/download/server |
 | Windows 10/11 Enterprise Eval ISO | https://www.microsoft.com/en-us/evalcenter/ |
 | Kali Linux ISO | https://www.kali.org/get-kali/ |
 
+> **Note**: VMware Workstation Player is free for personal use. Workstation Pro requires a license but has more features (snapshots, clones).
+
 ---
 
-## 2. VirtualBox Network Setup
+## 2. VMware Network Setup
 
 ### Create Host-Only Network
 ```
-File → Host Network Manager → Create
-Name: vboxnet0
-IPv4: 192.168.56.1/24
-DHCP: DISABLED (we use static IPs)
+VMware Workstation → Edit → Virtual Network Editor
+→ Change Settings (admin) → Add Network
+→ Select vmnet1 → Host-Only
+→ Subnet IP: 192.168.56.0 / Subnet Mask: 255.255.255.0
+→ Disable DHCP (we use static IPs)
+→ Disable "Connect a host virtual adapter to this network" (optional)
 ```
 
 ### VM Network Adapter Settings (All 3 VMs)
-- Adapter 1: **Host-Only Adapter** → `vboxnet0`
-- Adapter 2: **NAT** (for internet updates — optional, can enable temporarily)
+- **Network Adapter 1**: **Host-Only** → `vmnet1` (192.168.56.0/24)
+- **Network Adapter 2**: **NAT** (for internet updates — optional, can add temporarily)
 
 ---
 
@@ -36,32 +39,34 @@ DHCP: DISABLED (we use static IPs)
 ### Wazuh Manager (Ubuntu 22.04)
 ```
 Name: wazuh-manager
-Type: Linux → Ubuntu (64-bit)
-RAM: 4096 MB (4 GB)
+OS: Linux → Ubuntu 64-bit
+RAM: 4 GB (4096 MB)
 CPU: 2 vCPU
-Disk: 60 GB (VDI, dynamically allocated)
-Network: Adapter 1 → Host-Only (vboxnet0)
+Disk: 60 GB (SCSI, dynamically allocated, split into 2GB files)
+Network: Adapter 1 → Host-Only (vmnet1)
 ```
 
 ### Windows 10/11 Endpoint
 ```
 Name: win-endpoint
-Type: Microsoft Windows → Windows 10/11 (64-bit)
-RAM: 4096 MB (4 GB)
+OS: Microsoft Windows → Windows 10/11 x64
+RAM: 4 GB (4096 MB)
 CPU: 2 vCPU
-Disk: 80 GB (VDI, dynamically allocated)
-Network: Adapter 1 → Host-Only (vboxnet0)
+Disk: 80 GB (SCSI, dynamically allocated, split into 2GB files)
+Network: Adapter 1 → Host-Only (vmnet1)
 ```
 
 ### Kali Linux Attacker
 ```
 Name: kali-attacker
-Type: Linux → Debian (64-bit)  [Kali is Debian-based]
-RAM: 4096 MB (4 GB)
+OS: Linux → Debian 11/12 x64 (Kali is Debian-based)
+RAM: 4 GB (4096 MB)
 CPU: 2 vCPU
-Disk: 40 GB (VDI, dynamically allocated)
-Network: Adapter 1 → Host-Only (vboxnet0)
+Disk: 40 GB (SCSI, dynamically allocated, split into 2GB files)
+Network: Adapter 1 → Host-Only (vmnet1)
 ```
+
+> **Tip**: In VMware, select "UEFI" firmware type for Windows 11. Enable "Virtualize Intel VT-x/EPT or AMD-V/RVI" under Processor settings for nested virtualization if needed.
 
 ---
 
@@ -73,7 +78,7 @@ Network: Adapter 1 → Host-Only (vboxnet0)
 network:
   version: 2
   ethernets:
-    enp0s3:  # check with `ip a`
+    ens33:  # check with `ip a` (usually ens33 or ens192 in VMware)
       addresses: [192.168.56.10/24]
       routes:
         - to: default
@@ -90,7 +95,7 @@ sudo netplan apply
 # Check interface alias
 Get-NetIPConfiguration
 
-# Set static IP (adjust InterfaceAlias)
+# Set static IP (adjust InterfaceAlias - usually "Ethernet" or "Ethernet 2")
 New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 192.168.56.20 -PrefixLength 24 -DefaultGateway 192.168.56.1
 Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 8.8.8.8,1.1.1.1
 ```
@@ -269,16 +274,20 @@ sudo pwsh -Command "Invoke-AtomicTest T1059.001 -TestNumbers 1"
 
 **After full setup, TAKE SNAPSHOTS:**
 ```
-VirtualBox → Each VM → Snapshots → Take
+VMware → Select VM → Snapshots → Take Snapshot
 Name: "Clean Baseline - Post Setup"
+Description: "All VMs configured, Wazuh running, agents connected, no attacks run"
 ```
 
 **Before each attack simulation:**
 ```
 Take snapshot: "Pre-Test-[Technique-ID]"
+Example: "Pre-Test-T1110.001"
 ```
 
 **This lets you revert in 30 seconds instead of rebuilding.**
+
+> **VMware Snapshot Tip**: In Workstation Pro, use "Snapshot Manager" for tree view. In Player, use VM → Snapshot → Take Snapshot.
 
 ---
 
@@ -291,25 +300,45 @@ Take snapshot: "Pre-Test-[Technique-ID]"
 | Sysmon events missing | Verify config loaded: `Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" \| Select -First 5` |
 | Kali can't reach Windows | Disable Windows Firewall temporarily for lab: `Set-NetFirewallProfile -All -Enabled False` |
 | Suricata no alerts | Check rules loaded: `sudo suricata-update && sudo systemctl restart suricata` |
+| VMware Tools not installed | Install on each VM: `sudo apt install open-vm-tools` (Linux), mount ISO in Windows |
+| Network adapter not showing | Check VM settings → Network Adapter → "Connected" and "Connect at power on" |
 
 ---
 
 ## 12. Daily Workflow (After Setup)
 
 ```bash
-# Morning: Start VMs
-VBoxManage startvm "wazuh-manager" --type headless
-VBoxManage startvm "win-endpoint" --type headless
-VBoxManage startvm "kali-attacker" --type headless
+# Morning: Start VMs (VMware Workstation Pro)
+vmrun start "wazuh-manager.vmx" nogui
+vmrun start "win-endpoint.vmx" nogui
+vmrun start "kali-attacker.vmx" nogui
+
+# Or use GUI: Select all 3 VMs → Power On
 
 # During day: Wazuh Dashboard at https://192.168.56.10
 # Attack from Kali terminal (SSH or console)
 
-# Evening: Snapshot if testing, otherwise just save state
-VBoxManage controlvm "wazuh-manager" savestate
-VBoxManage controlvm "win-endpoint" savestate
-VBoxManage controlvm "kali-attacker" savestate
+# Evening: Suspend (saves RAM state to disk)
+vmrun suspend "wazuh-manager.vmx" hard
+vmrun suspend "win-endpoint.vmx" hard
+vmrun suspend "kali-attacker.vmx" hard
+
+# Or: VM → Power → Suspend (GUI)
 ```
+
+---
+
+## 13. VMware-Specific Notes
+
+| Feature | VMware Workstation Pro | VMware Player |
+|---------|------------------------|---------------|
+| Snapshots | ✅ Full tree support | ✅ Linear only |
+| Clones | ✅ Linked/Full clones | ❌ |
+| VM Teams | ✅ | ❌ |
+| REST API | ✅ | ❌ |
+| Cost | Paid license | Free (personal) |
+
+**For this lab**: Player is sufficient. Snapshots work linearly (one branch).
 
 ---
 

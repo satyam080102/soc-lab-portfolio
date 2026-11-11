@@ -23,8 +23,8 @@ This document describes the local SOC lab environment built for hands-on detecti
 │                           ▼                                     │
 │              ┌────────────────────────┐                          │
 │              │   Internal Network     │                          │
-│              │   (VirtualBox Host-    │                          │
-│              │    Only Adapter)       │                          │
+│              │   (VMware Host-Only    │                          │
+│              │    Network)            │                          │
 │              └────────────────────────┘                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -40,7 +40,7 @@ This document describes the local SOC lab environment built for hands-on detecti
 | **OS** | Ubuntu 22.04 Server |
 | **RAM** | 4 GB (4096 MB) |
 | **vCPU** | 2 |
-| **Disk** | 60 GB (dynamically allocated VDI) |
+| **Disk** | 60 GB (dynamically allocated) |
 | **IP** | 192.168.56.10/24 (static) |
 | **Services** | Wazuh Manager 4.8+, Wazuh Indexer, Wazuh Dashboard, Filebeat, Suricata 7 |
 
@@ -51,7 +51,7 @@ This document describes the local SOC lab environment built for hands-on detecti
 | **OS** | Windows 10/11 Enterprise Evaluation |
 | **RAM** | 4 GB (4096 MB) |
 | **vCPU** | 2 |
-| **Disk** | 80 GB (dynamically allocated VDI) |
+| **Disk** | 80 GB (dynamically allocated) |
 | **IP** | 192.168.56.20/24 (static) |
 | **Agents** | Wazuh Agent 4.8+, Sysmon 15.x (SwiftOnSecurity config) |
 
@@ -62,18 +62,18 @@ This document describes the local SOC lab environment built for hands-on detecti
 | **OS** | Kali Linux (latest) |
 | **RAM** | 4 GB (4096 MB) |
 | **vCPU** | 2 |
-| **Disk** | 40 GB (dynamically allocated VDI) |
+| **Disk** | 40 GB (dynamically allocated) |
 | **IP** | 192.168.56.30/24 (static) |
-| **Tools** | Atomic Red Team, Caldera, Impacket, CrackMapExec, evil-winrm |
+| **Tools** | Atomic Red Team, Impacket, CrackMapExec, evil-winrm |
 
 ---
 
 ## Network Configuration
 
-### Host-Only Network (vboxnet0)
+### Host-Only Network (VMware vmnet1)
 ```
 Network: 192.168.56.0/24
-Gateway: 192.168.56.1 (VirtualBox host)
+Gateway: 192.168.56.1 (VMware host)
 DHCP: Disabled (static IPs only)
 DNS: 8.8.8.8, 1.1.1.1
 ```
@@ -117,7 +117,7 @@ sudo ufw enable
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| VirtualBox | 7.0.x | Hypervisor |
+| VMware Workstation | 17.x / Player 17.x | Hypervisor |
 | Ubuntu Server | 22.04 LTS | Wazuh host OS |
 | Windows | 10/11 Enterprise Eval | Target endpoint |
 | Kali Linux | 2024.x | Attacker platform |
@@ -127,7 +127,6 @@ sudo ufw enable
 | Suricata | 7.x | Network IDS |
 | ET Open Ruleset | Latest | Suricata signatures |
 | Atomic Red Team | Latest | Attack simulation |
-| Caldera | Latest | Adversary emulation (optional) |
 | Wireshark | 4.x | PCAP analysis |
 | WinPMEM | Latest | Memory acquisition |
 | FTK Imager | Latest | Disk imaging |
@@ -144,7 +143,7 @@ sudo ufw enable
 | `Pre-Hunt-LOLBAS` | Before LOLBAS hunt | Clean state for hunt |
 | `Post-Capstone` | After full kill chain simulation | Preserve capstone evidence |
 
-**To snapshot**: VirtualBox → Select VM → Snapshots → Take → Name + Description
+**To snapshot**: VMware → Select VM → Snapshots → Take → Name + Description
 **To restore**: Select snapshot → Restore → Start VM
 
 ---
@@ -170,24 +169,25 @@ sudo ufw enable
 | Wazuh Indexer API | https://192.168.56.10:9200 | admin / (from install script) |
 | Windows RDP | 192.168.56.20:3389 | Local admin account |
 | Kali SSH | ssh kali@192.168.56.30 | kali / (set during install) |
-| Kali Console | VirtualBox GUI | kali / (set during install) |
+| Kali Console | VMware Console | kali / (set during install) |
 
 ---
 
 ## Maintenance Commands
 
-### Start All VMs (Headless)
+### Start All VMs
 ```bash
-VBoxManage startvm "wazuh-manager" --type headless
-VBoxManage startvm "win-endpoint" --type headless
-VBoxManage startvm "kali-attacker" --type headless
+# VMware Workstation CLI (vmrun)
+vmrun start "wazuh-manager.vmx" nogui
+vmrun start "win-endpoint.vmx" nogui
+vmrun start "kali-attacker.vmx" nogui
 ```
 
-### Save State (End of Day)
+### Suspend State (End of Day)
 ```bash
-VBoxManage controlvm "wazuh-manager" savestate
-VBoxManage controlvm "win-endpoint" savestate
-VBoxManage controlvm "kali-attacker" savestate
+vmrun suspend "wazuh-manager.vmx" hard
+vmrun suspend "win-endpoint.vmx" hard
+vmrun suspend "kali-attacker.vmx" hard
 ```
 
 ### Check Wazuh Services

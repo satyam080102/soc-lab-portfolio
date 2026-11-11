@@ -22,9 +22,9 @@ This repository documents a **30-day hands-on SOC lab project** completed while 
 |-----------|---------------|
 | **SIEM/XDR** | Wazuh 4.8 (Single-node: Indexer + Manager + Dashboard) |
 | **Endpoint** | Windows 11 + Sysmon 15 (SwiftOnSecurity config) + Wazuh Agent |
-| **Attacker** | Kali Linux + Atomic Red Team + Caldera |
+| **Attacker** | Kali Linux + Atomic Red Team |
 | **Network IDS** | Suricata 7 + ET Open Ruleset + Custom Rules |
-| **Network** | VirtualBox Host-Only (192.168.56.0/24) |
+| **Network** | VMware Host-Only (192.168.56.0/24) |
 | **Host** | Windows 11, 32 GB RAM, 12 GB allocated to VMs |
 
 📖 **[Full Setup Guide](docs/lab-quick-start.md)** — Reproducible in 2 hours.
@@ -105,7 +105,7 @@ This repository documents a **30-day hands-on SOC lab project** completed while 
 | **SIEM** | Wazuh (WQL, Dashboards, Rules, CDB), Splunk (SPL, Data Models, Dashboards) |
 | **Endpoint** | Sysmon (Event IDs 1,3,7,8,10,11,12,13,14,15,22,25), Wazuh Agent, Broadcom Symantec EDR (training) |
 | **Network** | Suricata (Rules, Eve JSON), Wireshark (PCAP, TCP streams, JA3), Zeek (optional) |
-| **Attack Simulation** | Atomic Red Team (Invoke-AtomicTest), Caldera (Adversary Profiles) |
+| **Attack Simulation** | Atomic Red Team (Invoke-AtomicTest) |
 | **Frameworks** | MITRE ATT&CK (Mapping, Coverage, Gap Analysis), Cyber Kill Chain, NIST IR |
 | **Scripting** | Python (Basic - log parsing, API), PowerShell (Investigation, Automation), SQL (Basic) |
 | **IR/Forensics** | Memory acquisition (WinPMEM), Disk imaging (FTK Imager), Evidence hashing, Chain of custody |

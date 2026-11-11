@@ -17,7 +17,7 @@
 
 ## 1. Executive Summary
 
-A simulated multi-stage attack was executed over 3 hours using Atomic Red Team and Caldera, emulating a complete APT-style kill chain: phishing email with malicious macro → initial access via PowerShell → persistence via Scheduled Task and Registry Run Key → discovery (system info, file enumeration, network scanning) → lateral movement via SMB/psexec → data staging → exfiltration over HTTP C2. The investigation reconstructed the full timeline, collected forensic evidence (memory dump, disk image, PCAP), and produced 3 new detection rules. This capstone demonstrates end-to-end investigation capability from initial alert to root cause and containment.
+A simulated multi-stage attack was executed over 3 hours using Atomic Red Team, emulating a complete APT-style kill chain: phishing email with malicious macro → initial access via PowerShell → persistence via Scheduled Task and Registry Run Key → discovery (system info, file enumeration, network scanning) → lateral movement via SMB/psexec → data staging → exfiltration over HTTP C2. The investigation reconstructed the full timeline, collected forensic evidence (memory dump, disk image, PCAP), and produced 3 new detection rules. This capstone demonstrates end-to-end investigation capability from initial alert to root cause and containment.
 
 ---
 
@@ -245,7 +245,6 @@ evidence/
 
 - MITRE ATT&CK Enterprise Matrix: https://attack.mitre.org/matrices/enterprise/
 - Atomic Red Team: https://github.com/redcanaryco/atomic-red-team
-- Caldera Adversary Emulation: https://github.com/mitre/caldera
 - NIST SP 800-61 Rev. 2 (IR Guide): https://csrc.nist.gov/publications/detail/sp/800-61/rev-2/final
 - Volatility 3 Framework: https://github.com/volatilityfoundation/volatility3
 

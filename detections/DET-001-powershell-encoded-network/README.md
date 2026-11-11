@@ -179,7 +179,7 @@ tags:
 |---------|-----------|-----------------|---------|--------|
 | TEST-001 | T1059.001 | Atomic Red Team | `Invoke-AtomicTest T1059.001 -TestNumbers 1` | ✅ ALERTED |
 | TEST-002 | T1059.001 | Manual | `powershell -enc <base64>` + `Invoke-WebRequest` | ✅ ALERTED |
-| TEST-003 | T1059.001 | Caldera | Adversary profile "APT29" | ✅ ALERTED |
+| TEST-003 | T1059.001 | Manual (APT29-style) | `powershell -enc <base64>` + staged payload | ✅ ALERTED |
 | TEST-004 | T1105 | Atomic Red Team | `Invoke-AtomicTest T1105 -TestNumbers 1` | ✅ ALERTED (composite) |
 
 ### False Positive Testing
